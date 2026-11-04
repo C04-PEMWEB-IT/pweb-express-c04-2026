@@ -1,6 +1,6 @@
 # MLBB Shop API - Praktikum Pemrograman Web Modul 4
 
-Backend Express untuk toko versi sederhana Mobile Legends (Diamond, Battle Point, hero, skin) buatan HMIT ITS.
+Backend Express untuk toko versi sederhana Mobile Legends (Diamond, Battle Point, hero, skin).
 
 **Tech stack:** Express 5 + TypeScript, Prisma ORM 7, PostgreSQL di Neon (`@prisma/adapter-neon`).
 
