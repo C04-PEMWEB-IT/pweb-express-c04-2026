@@ -14,8 +14,8 @@ export const isBlank = (value: unknown): boolean =>
   value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
 
 // Ubah parameter URL (string) menjadi id angka. Bukan angka -> 400
-export const parseId = (value: string | undefined, label: string): number => {
-  if (value === undefined || !/^\d+$/.test(value)) {
+export const parseId = (value: unknown, label: string): number => {
+  if (typeof value !== 'string' || !/^\d+$/.test(value)) {
     throw new HttpError(400, `${label} harus berupa angka`);
   }
   const id = Number(value);

@@ -28,22 +28,57 @@ npm run dev
 
 Cek `http://localhost:3000/health`. Seed ulang sebelum demo / sebelum menjalankan testcase.
 
-## Install manual dari nol (urutan yang dipakai)
+## Persiapan sebelum testing
 
-```bash
-npm install express@5 dotenv @prisma/client@7 @prisma/adapter-neon@7
-npm install -D typescript tsx prisma@7 @types/node @types/express@5
-```
+Lakukan langkah berikut **sebelum** menjalankan testcase. Urutannya penting karena testcase memakai data hasil seed dan saling bergantung.
+
+| Kebutuhan | Keterangan |
+| --- | --- |
+| Node.js | 20.19+ (`node -v`) |
+| Dependency | Sudah `npm install` |
+| Database | PostgreSQL di Neon, sudah dibuat |
+| File `.env` | Disalin dari `.env.example` dan diisi (lihat tabel Environment variable) |
+| Prisma Client | Sudah `npx prisma generate` |
+| Tabel database | Sudah dimigrasi (`npx prisma migrate deploy`, atau `npx prisma migrate dev --name init` untuk pertama kali) |
+| Data awal | Sudah `npm run seed` |
+| Tools testing | Postman / Insomnia / Newman |
+| Server | Sudah `npm run dev` dan `/health` mengembalikan 200 |
+
+Checklist persiapan:
+
+1. `npm install`
+2. Siapkan `.env` di root project (tidak di-commit, tetapi terdapat contohnya pada `.env.example`):
+   ```env
+   DATABASE_URL="postgresql://...-pooler...neon.tech/neondb?sslmode=require"
+   DATABASE_URL_UNPOOLED="postgresql://...neon.tech/neondb?sslmode=require"
+   PORT=3000
+   ```
+3. `npx prisma generate`
+4. `npx prisma migrate deploy` (database baru: `npx prisma migrate dev --name init`)
+5. `npm run seed` — **jalankan tepat sebelum testing / demo**
+6. Verifikasi data seed lewat `npx prisma studio` atau `GET /api/statistics`:
+   - Hero: 133 (id 1 = Miya, id 133 = Hirara)
+   - Skin: 892
+   - Player: 3 (ArekITS, SangPushRank, MageSurabaya)
+   - PlayerHero: 4
+7. `npm run dev`, lalu cek `http://localhost:3000/health` → 200
+8. Import `mlbb-shop-testcase.postman_collection.json` ke Postman, lalu **Run** collection dari nomor 1 sampai 28 sesuai urutan
+
+> **Penting:** testcase bersifat berurutan dan saling bergantung (misalnya testcase #7 dan #13 mengharapkan data dari #6 dan #12). Jangan melompat atau mengacak urutan. Jika ingin mengulang dari awal, jalankan `npm run seed` lagi. Collection ini tidak punya assertion otomatis, jadi status code dan isi response dicek manual.
+
+### File testcase
+
+Semua testcase ada di [`mlbb-shop-testcase.postman_collection.json`](./mlbb-shop-testcase.postman_collection.json). File ini berisi 28 request yang harus dijalankan berurutan dari nomor 1 sampai 28; nama tiap request menjelaskan skenario dan hasil yang diharapkan (misalnya `07. Tambah Hero Nama Sudah Ada` diharapkan menghasilkan 409).
 
 ## Environment variable
 
 | Variabel | Fungsi |
 | --- | --- |
 | `DATABASE_URL` | Pooled connection Neon (ada `-pooler`), dipakai aplikasi lewat adapter |
-| `DIRECT_URL` | Direct connection Neon, dipakai Prisma CLI (`prisma.config.ts`) |
+| `DATABASE_URL_UNPOOLED` | Direct connection Neon, dipakai Prisma CLI (`prisma.config.ts`) |
 | `PORT` | Port server (default 3000) |
 
-`.env` tidak di-commit. Contoh ada di `.env.example`.
+`.env` tidak di-commit kedalam repositori ini. Contoh ada di `.env.example`.
 
 ## Endpoint
 
@@ -79,11 +114,3 @@ src/
   controllers/     hero, skin, player, purchase, transaction, statistic
   routes/          satu file per fitur + index.ts
 ```
-
-## Pembagian tugas kelompok
-
-| Anggota | Bagian |
-| --- | --- |
-| Anggota 1 | Setup project, Neon, schema, seed, `/health`, middleware (Fitur 1), Top Up & Match (Fitur 5), Statistik (Fitur 7) |
-| Anggota 2 | Hero (Fitur 2), Skin (Fitur 3) |
-| Anggota 3 | Player CRUD (Fitur 4), Beli Hero (Fitur 6) |
